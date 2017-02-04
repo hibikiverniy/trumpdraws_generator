@@ -17,8 +17,8 @@ import time
 
 app = Flask(__name__)
 
-IMAGE_URL_BASE = 'https://s3.amazonaws.com/yacosnaps/'
-#IMAGE_URL_BASE = 'https://snaps.yacomink.com/'
+#IMAGE_URL_BASE = 'https://s3.amazonaws.com/yacosnaps/'
+IMAGE_URL_BASE = 'https://snaps.yacomink.com/'
 IMAGE_BUCKET = 'yacosnaps'
 IMAGE_BUCKET_PREFIX = 't/'
 
@@ -148,6 +148,7 @@ def show(name=None):
     hasher = hashlib.sha1()
     hasher.update(left_path)
     hasher.update(right_path)
+    hasher.update(str(frames))
 
     loc = '/tmp/' + hasher.hexdigest() + '.gif'
     s3path = IMAGE_BUCKET_PREFIX + hasher.hexdigest() + '.gif' 
@@ -157,8 +158,8 @@ def show(name=None):
     b = conn.get_bucket(IMAGE_BUCKET)
     k = Key(b)
     k.key = s3path 
-    #if (b.get_key(k.key)):
-    #    return render_template('index.html', img='https://snaps.yacomink.com/' + k.key)
+    if (b.get_key(k.key)):
+        return render_template('index.html', img='https://snaps.yacomink.com/' + k.key)
 
     for i in range(0, frames):
         over_left = getPageSizedImage(SimpleCV.Image(left_path));
@@ -172,7 +173,7 @@ def show(name=None):
             if (right_page_coords[0] != (0,0)):
                 over = over + over_right.warp(right_page_coords)
 
-        foreground = PIL.Image.open('trumps/trump_clipped_' + str(i) + '.png')
+        foreground = PIL.Image.open(os.path.dirname(__file__) + '/trumps/trump_clipped_' + str(i) + '.png')
 
         if (over):
             out = over.getPIL()
